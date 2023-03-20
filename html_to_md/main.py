@@ -116,7 +116,7 @@ def modify_md(folder_path, output_name, Multipart_count=True):
         multi_merge_files(output_name, output_name + '分片合并', 'md', max_size=18)
     all_folder = output_name+'all'
     os.makedirs(all_folder)
-    merge_files(output_name, all_folder + '/' output_name+'.md')
+    merge_files(output_name, all_folder + '/' + output_name+'.md')
         
 
 def sort_filenames(filenames):

@@ -1,29 +1,76 @@
 import requests
 
+client_id = 'Ds7a6NRDkqSxWByxdTzK6BhDy2pZDEcN'
+client_secret = 'APU2mQCZN9H76023xcHprjGcXclxS8Q4'
+
 
 def get_code():
-    url = 'http: // openapi.baidu.com/oauth/2.0/authorize?response_type = {}&client_id = {}&redirect_uri = 您应用的授权回调地址&
-scope = basic, netdisk&
-device_id = 您应用的AppID'
-GET 
+    url = 'http://openapi.baidu.com/oauth/2.0/authorize?response_type=code&client_id={}&redirect_uri={}&scope=basic,' \
+          'netdisk&device_id={}'.format(
+        'Ds7a6NRDkqSxWByxdTzK6BhDy2pZDEcN',
+        'oob',
+        '31435215'
+    )
+    print(url)
+    resp = requests.get(url=url)
+    if resp.status_code != 200:
+        print("获取code失败")
 
-以上链接示例中参数仅给出了必选参数，其中device_id为硬件应用下的必选参数。
-关于应用的相关信息，您可在控制台，点进去您对应的应用，查看应用详情获得。
 
+def auth(code):
+    url = "https://openapi.baidu.com/oauth/2.0/token?grant_type=authorization_code&code" \
+          "={}&client_id={}&client_secret" \
+          "={}&redirect_uri=oob".format(code, client_id, client_secret)
 
-def auth():
-    url = "https://openapi.baidu.com/oauth/2.0/token?grant_type=authorization_code&code=d5a53cd0ca7799d033399487b23ec992&client_id=EVaI5x0U6lEmP125G0Su55ROEXZtItdD&client_secret=VPgfmrt8UBM5kgkeUemwRVmr5AjhFuEV&redirect_uri=oob"
-
-    payload = {
-        'response_type': 'code',
-        'client_id': 'Ds7a6NRDkqSxWByxdTzK6BhDy2pZDEcN',
-        'redirect_uri': 'oob',
-        'scope':'basic,netdisk'
-    }
     headers = {
-    'User-Agent': 'pan.baidu.com'
+        'User-Agent': 'pan.baidu.com'
     }
 
-    response = requests.request("GET", url, headers=headers, data = payload)
+    response = requests.request("GET", url, headers=headers)
+    print(response.text.encode('utf8'))
+    return response.json()
+
+
+def refresh_token(refresh_token):
+    url = "https://openapi.baidu.com/oauth/2.0/token?grant_type=refresh_token&refresh_token={}&client_id={}&client_secret={}".format(
+        refresh_token, client_id, client_secret)
+
+    payload = {}
+    headers = {
+        'User-Agent': 'pan.baidu.com'
+    }
+
+    response = requests.request("GET", url, headers=headers, data=payload)
 
     print(response.text.encode('utf8'))
+
+def get_file_list_all(access_token):
+    url = "http://pan.baidu.com/rest/2.0/xpan/multimedia?method=listall&path=/{}&access_token={" \
+          "}&web=1&recursion=1&start=0&order=name".format("极客时间", access_token)
+
+    payload = {}
+    files = {}
+    headers = {
+        'User-Agent': 'pan.baidu.com'
+    }
+    response = requests.request("GET", url, headers=headers, data=payload, files=files)
+
+    print(response.text.encode('utf8'))
+
+def get_file_list(folder_name, access_token):
+    url = "https://pan.baidu.com/rest/2.0/xpan/file?method=list&dir=/{}&order=name&start=0&web=web&folder=0&access_token={}".format(folder_name, access_token)
+
+    payload = {}
+    files = {}
+    headers = {
+        'User-Agent': 'pan.baidu.com'
+    }
+
+    response = requests.request("GET", url, headers=headers, data=payload, files=files)
+
+    print(response.text.encode('utf8'))
+
+if __name__ == '__main__':
+    get_code()
+    token_info = auth()
+    refresh_token(token_info['refresh_token'])
